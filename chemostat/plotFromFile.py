@@ -32,20 +32,25 @@ with open(filename,'r') as csvfile:
     data = np.array(x).astype("float")
 
 
+# time processing:
+for i in range(data.shape[0]):
+    if data[i,0] < 1629982730:
+        data[i,0] = data[i,0] + 117881
+
 x = np.vectorize(datetime.fromtimestamp)(data[:, 0])
 plt.xlabel('time')
 plt.gcf().autofmt_xdate()
 myFmt = mdates.DateFormatter('%H:%M')
 plt.gca().xaxis.set_major_formatter(myFmt)
-plt.title('Plot')
-plt.ylabel('data')
+plt.title('Plot - Raw data')
+plt.ylabel('raw data')
 
 for i in range(data.shape[1] - 1):
     y = invert * data[:,i+1]
     plt.plot(x, y, linestyle = 'solid')
     #plt.plot(x, y, '.')
 
-    if 1: #If averaging
+    if 0: #If averaging
         #Processing - averaging/low pass filtering
         numReadings = 20
         queue = [0]*numReadings
