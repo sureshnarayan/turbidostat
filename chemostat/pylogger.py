@@ -22,7 +22,7 @@ if len(sys.argv) > 1:
     if len(sys.argv) > 2:
         a_laser = float(sys.argv[2])
 
-plot_window = 1000
+plot_window = 10000
 x_var = np.arange(plot_window, dtype=float)
 y_var = np.zeros(plot_window)
 y_var2 = np.zeros(plot_window)
@@ -36,7 +36,8 @@ plt.ion()
 fig, ax = plt.subplots()
 line, = ax.plot(x_var, y_var, '.')
 line2, =ax.plot(x_var, y_var2, '.')
-ax.set_ylim([0,10])
+ax.set_ylim([-10,10])
+plt.grid()
 
 initial_time = time.time()
 

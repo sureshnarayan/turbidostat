@@ -18,10 +18,11 @@ plt.rc('axes', prop_cycle=(cycler('color', colors)))
 
 dateTimeObj = datetime.datetime.now()
 
-plot_window = 100
-x_var = np.arange(plot_window, dtype=float)
-y_var = np.zeros(plot_window)
-y_var2 = np.zeros(plot_window)
+plot_window = 10000
+initDataSize = 10
+x_var = np.arange(initDataSize, dtype=float)
+y_var = np.zeros(initDataSize)
+y_var2 = np.zeros(initDataSize)
 index = 1
 
 numReadings = 100
@@ -57,9 +58,10 @@ while True:
         y_var = np.append(y_var, plotData)
         y_var2 = np.append(y_var2, sum(queue)/numReadings)
         
-        x_var = x_var[1:plot_window+1]
-        y_var = y_var[1:plot_window+1]
-        y_var2 = y_var2[1:plot_window+1]
+        if x_var.shape[0] > plot_window :
+            x_var = x_var[1:plot_window+1]
+            y_var = y_var[1:plot_window+1]
+            y_var2 = y_var2[1:plot_window+1]
         #line.set_xdata(x_var)
         line.set_ydata(y_var)
         line2.set_ydata(y_var2)
