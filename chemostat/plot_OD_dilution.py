@@ -129,6 +129,13 @@ def calculatePlot(plot_title, experiment_data, a_laser, v_initial, subplot_index
             yvar[j] = sum(queue)/numReadings
         plt.plot(real_time, yvar, '.', label = "Averaged (100 values)")
 
+    if 0: #Inflow times
+        inflow_time = []
+        for j in range(experiment_data.shape[0]):
+            if experiment_data[j,2] < 700:
+                inflow_time.append(j)
+        plt.plot(real_time[inflow_time], OD[inflow_time], 'g.', label = "Inflow timings")
+
     plt.ylabel("OD")
     # plt.title("OD Variation on Dilution (V_laser = 4V)")
     plt.legend(loc = "upper right")
@@ -142,12 +149,12 @@ def calculatePlot(plot_title, experiment_data, a_laser, v_initial, subplot_index
 
 
 # time processing:
-for i in range(data.shape[0]):
-    if data[i,0] < 1629982730:
-        data[i,0] = data[i,0] + 117881
+# for i in range(data.shape[0]):
+#     if data[i,0] < 1629982730:
+#         data[i,0] = data[i,0] + 117881
 
 
-calculatePlot("Yeast growth 27Aug", data[:], 900, 6, 1, x_axis)
+calculatePlot("Yeast growth 31Aug", data[:], 900, 6, 1, x_axis)
 
 
 # for i in range(data.shape[1] - 1):

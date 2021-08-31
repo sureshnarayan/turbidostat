@@ -72,21 +72,21 @@ void loop()
   Serial.println(level);
     
   
-  if (average < 675 && iteration > 40)
-  {   for(i=0;i<=4;i++)
-      { digitalWrite(7, LOW);
-        delay(20);
-        digitalWrite(7, HIGH);
-      }
-      delay(300);
+  if (average < 450 && iteration > 40)
+  {   
+    digitalWrite(7, LOW);
+    delay(500);
+    digitalWrite(7, HIGH);
+    delay(300);
+    
   }
 
-  if (level < 800 && iteration > 40)
-  {   digitalWrite(8, LOW);
-      delay(500);
-      digitalWrite(8, HIGH);
-
-      delay(300);
+  if (level < 600 && iteration > 40)
+  {   
+    digitalWrite(8, LOW);
+    delay(7000);
+    digitalWrite(8, HIGH);
+    delay(300);
   }
 }
  
