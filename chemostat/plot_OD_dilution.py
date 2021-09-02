@@ -38,7 +38,7 @@ plot_title = "OD Variation on Dilution (V_laser = 4V)"
 
 # reading without sample - of analogRead in Arduino (max 1023)
 # a_laser = 1004
-a_laser = 404
+a_laser = 800
 
 # what readings - beginning and end - in the data
 # begin = 1092
@@ -137,8 +137,10 @@ def calculatePlot(plot_title, experiment_data, a_laser, v_initial, subplot_index
         plt.plot(real_time[inflow_time], OD[inflow_time], 'g.', label = "Inflow timings")
 
     plt.ylabel("OD")
+    # plt.yscale("log")
     # plt.title("OD Variation on Dilution (V_laser = 4V)")
-    plt.legend(loc = "upper right")
+    plt.legend(loc = "upper left")
+    plt.grid(True)
 
 #calculatePlot("Plot label",  data[begin:end],   a_laser, v_initial, 1, x_axis)
 # calculatePlot("4V laser, 6ml init volume",  data[1092:1830],   1000, 6, 1, x_axis)
@@ -149,12 +151,12 @@ def calculatePlot(plot_title, experiment_data, a_laser, v_initial, subplot_index
 
 
 # time processing:
-# for i in range(data.shape[0]):
-#     if data[i,0] < 1629982730:
-#         data[i,0] = data[i,0] + 117881
+for i in range(data.shape[0]):
+    if data[i,0] < 1630426739:
+        data[i,0] = data[i,0] + (1630426739 - 1630394045)
 
 
-calculatePlot("Yeast growth 31Aug", data[:], 900, 6, 1, x_axis)
+calculatePlot("Yeast growth 31Aug", data[:], 800, 6, 1, x_axis)
 
 
 # for i in range(data.shape[1] - 1):

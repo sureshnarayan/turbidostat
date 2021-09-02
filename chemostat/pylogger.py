@@ -16,7 +16,7 @@ dateTimeObj = datetime.datetime.now()
 # timestampStr = dateTimeObj.strftime("%d-%b-%Y (%H:%M:%S.%f)")
 filename = "log_"+ dateTimeObj.strftime("%d%b_%H%M%S") +".csv"
 # a_laser = 900
-a_laser = 700
+a_laser = 900
 if len(sys.argv) > 1:
     filename = sys.argv[1]
     if len(sys.argv) > 2:
@@ -38,6 +38,7 @@ line, = ax.plot(x_var, y_var, '.')
 line2, =ax.plot(x_var, y_var2, '.')
 ax.set_ylim([-10,10])
 plt.grid()
+# plt.yscale("log")
 
 initial_time = time.time()
 
@@ -69,8 +70,8 @@ while True:
         queue.append(plotData)
 
         x_var = np.append(x_var, (time.time() - initial_time))
-        y_var = np.append(y_var, plotData)
-        y_var2 = np.append(y_var2, sum(queue)/numReadings)
+        y_var = np.append(y_var, np.log2(plotData))
+        y_var2 = np.append(y_var2, np.log2(sum(queue)/numReadings))
         x_var = x_var[1:plot_window+1]
         y_var = y_var[1:plot_window+1]
         y_var2 = y_var2[1:plot_window+1]

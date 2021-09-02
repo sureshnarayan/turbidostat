@@ -7,11 +7,11 @@ from matplotlib.cm import get_cmap
 from cycler import cycler
 
 filename = 'log_20210820_225727.csv'
-invert = 1
+withtime = True
 if len(sys.argv) > 1:
     filename = sys.argv[1]
     if len(sys.argv) > 2:
-        invert = -1
+        withtime = False
 
 
 name = "Dark2"#"Accent"
@@ -31,23 +31,31 @@ with open(filename,'r') as csvfile:
     x = list(reader)
     data = np.array(x).astype("float")
 
+dataAxisStart = 0
 
-# time processing:
-for i in range(data.shape[0]):
-    if data[i,0] < 1629982730:
-        data[i,0] = data[i,0] + 117881
+if withtime:
+    dataAxisStart = 1
 
-x = np.vectorize(datetime.fromtimestamp)(data[:, 0])
-plt.xlabel('time')
-plt.gcf().autofmt_xdate()
-myFmt = mdates.DateFormatter('%H:%M')
-plt.gca().xaxis.set_major_formatter(myFmt)
-plt.title('Plot - Raw data')
-plt.ylabel('raw data')
+    # time processing:
+    for i in range(data.shape[0]):
+        if data[i,0] < 1630426739:
+            data[i,0] = data[i,0] + (1630426739 - 1630394045)
 
-for i in range(data.shape[1] - 1):
-    y = invert * data[:,i+1]
-    plt.plot(x, y, linestyle = 'solid')
+    x = np.vectorize(datetime.fromtimestamp)(data[:, 0])
+    plt.xlabel('time')
+    plt.gcf().autofmt_xdate()
+    myFmt = mdates.DateFormatter('%H:%M')
+    plt.gca().xaxis.set_major_formatter(myFmt)
+    plt.title('Plot - Raw data vs time')
+    plt.ylabel('raw data')
+
+
+for i in range(data.shape[dataAxisStart] - 1):
+    # y = np.log10(900 / (data[:,i+1]))
+    y = data[:,i+1]
+    plt.plot(x, y, '.')
+    # plt.yscale("log")
+    plt.grid(True)
     #plt.plot(x, y, '.')
 
     if 0: #If averaging
