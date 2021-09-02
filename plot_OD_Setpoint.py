@@ -71,7 +71,7 @@ def calculatePlot(plot_title, experiment_data, a_laser):
 
 
     name = "Dark2"#"Accent"
-    cmap = get_cmap(name)  # type: matplotlib.colors.ListedColormap
+    cmap = get_cmap(name)  ##type: matplotlib.colors.ListedColormap
     colors = cmap.colors  # type: list
     plt.rc('axes', prop_cycle=(cycler('color', colors)))
 
