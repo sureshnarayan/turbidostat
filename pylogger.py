@@ -14,7 +14,7 @@ ser.flushInput()
 
 dateTimeObj = datetime.datetime.now()
 # timestampStr = dateTimeObj.strftime("%d-%b-%Y (%H:%M:%S.%f)")
-filename = "log_"+ dateTimeObj.strftime("%d%b_%H%M%S") +".csv"
+filename = "log/log_"+ dateTimeObj.strftime("%d%b_%H%M%S") +".csv"
 # a_laser = 900
 a_laser = 900
 if len(sys.argv) > 1:
