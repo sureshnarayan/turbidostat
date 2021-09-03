@@ -10,6 +10,7 @@ filenames = ""
 if len(sys.argv) > 1:
     filenames = sys.argv[1:]
 
+# reading without sample - of analogRead in Arduino (max 1023)
 a_laser = 900
 
 x = []
@@ -31,10 +32,6 @@ for filename in filenames:
         else:
             data = np.vstack((data, (np.array(x).astype("float"))))
 
-
-# reading without sample - of analogRead in Arduino (max 1023)
-a_laser = 800
-
 experiment_data = data[:]
 
 def getOD(a_ldr, a_laser):
@@ -45,7 +42,7 @@ def getOD(a_ldr, a_laser):
 
     # OD conversion
     #   get resistance
-    r_ldr = r_series * (1023 - a_ldr) / a_ldr
+    r_ldr   = r_series * (1023 - a_ldr) / a_ldr
     r_laser = r_series * (1023 - a_laser) / a_laser
 
     #   get logIntensity
