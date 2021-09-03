@@ -10,7 +10,7 @@ filenames = ""
 if len(sys.argv) > 1:
     filenames = sys.argv[1:]
 
-a_laser = 800
+a_laser = 900
 
 x = []
 y = []
