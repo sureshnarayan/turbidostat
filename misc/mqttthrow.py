@@ -30,7 +30,8 @@ def on_disconnect(client, userdata, rc):
 client = mqtt.Client()
 client.connected_flag=False
 client.bad_connection_flag=False
-broker = "localhost"
+# broker = "localhost"
+broker = "172.16.100.68"
 port = 1883
 client.connect(broker,port,60)
 client.on_connect = on_connect
@@ -59,7 +60,7 @@ while True:
         decoded_bytes = ser_bytes[0:len(ser_bytes)-2].decode("utf-8")
         try:
             data = [float(i) for i in (decoded_bytes.split(","))]
-            logData = [time.time()] + data
+            logData = [round(time.time(),3)] + data
             print(data)
             try:
                 client.publish("turbidostat/log", json.dumps(logData))
