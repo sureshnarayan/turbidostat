@@ -30,8 +30,8 @@ def on_disconnect(client, userdata, rc):
 client = mqtt.Client()
 client.connected_flag=False
 client.bad_connection_flag=False
-# broker = "localhost"
-broker = "172.16.100.68"
+broker = "localhost"
+# broker = "172.16.100.68"
 port = 1883
 client.connect(broker,port,60)
 client.on_connect = on_connect

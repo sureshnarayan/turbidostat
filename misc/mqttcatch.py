@@ -35,8 +35,8 @@ client = mqtt.Client(transport="websockets")
 client.connected_flag=False
 client.bad_connection_flag=False
 client.buffer = []
-broker = "172.16.100.68"
-# broker = "localhost"
+# broker = "172.16.100.68"
+broker = "localhost"
 port = 8080
 client.connect(broker,port,60)
 client.on_connect = on_connect
