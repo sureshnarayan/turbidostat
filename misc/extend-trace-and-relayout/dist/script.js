@@ -68,7 +68,7 @@ var itime = new Date();
 var data = [{
   x: [itime], 
   y: [rand],
-  type: 'scatter',
+  type: 'scattergl',
   mode:'marker'
 }]
 
@@ -106,7 +106,7 @@ var interval = setInterval(function() {
     
     console.log(update);
     Plotly.extendTraces('graph', update, [0], time.length);
-    incomingData = [];
+    // incomingData = [];
     newMessageFlag = false;
     //Plotly.relayout('graph', minuteView);
     //Plotly.react('graph', updateData);

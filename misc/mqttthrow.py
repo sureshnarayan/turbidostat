@@ -30,17 +30,17 @@ def on_disconnect(client, userdata, rc):
 client = mqtt.Client()
 client.connected_flag=False
 client.bad_connection_flag=False
-# broker = "localhost"
-broker = "172.16.100.68"
+broker = "localhost"
+# broker = "172.16.100.68"
 port = 1883
-client.connect(broker,port,60)
 client.on_connect = on_connect
 client.on_message = on_message
 client.loop_start()
 print("Connecting to broker ",broker)
 try:
     client.connect(broker,port) #connect to broker
-except:
+except Exception as e:
+    raise
     print("Could not connect")
 
 while not client.connected_flag and not client.bad_connection_flag: #wait in loop
@@ -61,7 +61,7 @@ while True:
         try:
             data = [float(i) for i in (decoded_bytes.split(","))]
             logData = [round(time.time(),3)] + data
-            print(data)
+            print(logData)
             try:
                 client.publish("turbidostat/log", json.dumps(logData))
             except:
