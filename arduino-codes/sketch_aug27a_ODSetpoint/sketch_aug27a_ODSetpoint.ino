@@ -71,7 +71,7 @@ void loop()
   lcd.print(level);
   Serial.println(level);
     
-  
+  /*
   if (average < 780 && iteration > 200)
   {   
     digitalWrite(7, LOW);
@@ -89,5 +89,6 @@ void loop()
     digitalWrite(8, HIGH);
     delay(300);
   }
+  */
 }
  

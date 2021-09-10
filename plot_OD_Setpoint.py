@@ -74,6 +74,7 @@ def calculatePlot(plot_title, experiment_data, a_laser):
 
     real_time = np.vectorize(datetime.fromtimestamp)(experiment_data[:, 0])
     # plt.xlabel('time')
+    # plt.yscale('log')
     plt.gcf().autofmt_xdate()
     myFmt = mdates.DateFormatter('%H:%M')
     plt.gca().xaxis.set_major_formatter(myFmt)
