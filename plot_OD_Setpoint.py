@@ -117,7 +117,7 @@ for i in range(data.shape[0]):
     if data[i,0] < 1630426739:
         data[i,0] = data[i,0] + (1630426739 - 1630394045)
 
-plot_str = "OD Setpoint " + datetime.utcfromtimestamp(experiment_data[0,0]).strftime("%d%b")
+plot_str = "OD " + datetime.utcfromtimestamp(experiment_data[0,0]).strftime("%d%b")
 calculatePlot(plot_str, data[:], a_laser)
 
 plt.show()
