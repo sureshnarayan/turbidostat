@@ -3,7 +3,7 @@
 import paho.mqtt.client as mqtt
 import time
 import datetime
-import csv
+import csv, sys
 import matplotlib
 matplotlib.use("tkAgg")
 import matplotlib.pyplot as plt
@@ -13,7 +13,7 @@ from pandas import date_range
 import matplotlib.dates as mdates
 import utilsOD
 
-a_laser = 900
+a_laser = 25
 
 # This is the Subscriber
 def on_connect(client, userdata, flags, rc):
@@ -58,26 +58,48 @@ while not client.connected_flag and not client.bad_connection_flag: #wait in loo
 if client.bad_connection_flag:
     client.loop_stop()    #Stop loop
 
-
-today = datetime.datetime.now() 
-yesterday = today - datetime.timedelta(days = 1)
-
-plot_window = 10000
-# x_var = np.arange(plot_window, dtype=float)
-x_var = date_range(start=yesterday, end=today, periods=plot_window).to_pydatetime().tolist()
-y_var = np.zeros(plot_window)
-y_var2 = np.zeros(plot_window)
-index = 1
-
+plot_window = 1
+# x_var = date_range(start=yesterday, end=today, periods=plot_window).to_pydatetime().tolist()
+x_var = datetime.datetime.now() 
+y_var = np.zeros(1)
+y_var2 = np.zeros(1)
+data = None
 
 numReadings = 100
 queue = [0]*numReadings
 
+filenames = ""
+if len(sys.argv) > 1:
+    filenames = sys.argv[1:]
+
+    for filename in filenames:
+        with open(filename,'r') as csvfile:
+            reader = csv.reader(csvfile, delimiter = ',')
+            labels = next(reader)
+            x = list(reader)
+            numColumns = len(x[0])
+            for i in x:
+                if len(i) - numColumns:
+                    x.remove(i)
+            if data is None:
+                data = np.array(x).astype("float")
+            else:
+                data = np.vstack((data, (np.array(x).astype("float"))))
+    x_var = np.vectorize(datetime.datetime.fromtimestamp)(data[:, 0])
+    y_var = utilsOD.getOD(data[:,1],a_laser)
+    
+    y_var2 = np.zeros(shape=(y_var.shape[0]))
+    for j in range(y_var.shape[0]):
+        queue.pop(0)
+        queue.append(y_var[j])
+        y_var2[j] = sum(queue)/numReadings
+
+
 # x_var = np.vectorize(datetime.datetime.fromtimestamp)(x_var)
 plt.xlabel('time')
 plt.gcf().autofmt_xdate()
-myFmt = mdates.DateFormatter('%H:%M')
-plt.gca().xaxis.set_major_formatter(myFmt)
+# myFmt = mdates.DateFormatter('%H:%M')
+# plt.gca().xaxis.set_major_formatter(myFmt)
 
 
 plt.ion()
@@ -93,7 +115,7 @@ while True:
     try:
         if len(client.buffer):
             newData = client.buffer
-            print(newData)
+            # print(newData)
             client.buffer = []
         else:
             continue
@@ -103,15 +125,16 @@ while True:
             #If averaging
             #Processing - averaging/low pass filtering
             plotData = utilsOD.getOD(data[1],a_laser)
+            print(plotData)
             queue.pop(0)
             queue.append(plotData)
             # x_var = np.append(x_var, (time.time() - initial_time))
             x_var = np.append(x_var, datetime.datetime.now())
             y_var = np.append(y_var, plotData)
             y_var2 = np.append(y_var2, sum(queue)/numReadings)
-            x_var = x_var[1:plot_window+1]
-            y_var = y_var[1:plot_window+1]
-            y_var2 = y_var2[1:plot_window+1]
+            # x_var = x_var[1:plot_window+1]
+            # y_var = y_var[1:plot_window+1]
+            # y_var2 = y_var2[1:plot_window+1]
         line.set_xdata(x_var)
         line.set_ydata(y_var)
         line2.set_xdata(x_var)
