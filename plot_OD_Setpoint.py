@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("tkAgg")
 import csv, sys
 from datetime import datetime
 import matplotlib.dates as mdates
