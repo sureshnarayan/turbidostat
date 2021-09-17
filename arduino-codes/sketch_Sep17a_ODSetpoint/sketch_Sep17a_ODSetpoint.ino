@@ -22,9 +22,9 @@ unsigned long waitTime = 0;
 const unsigned long int inflowTime = 5000;
 const unsigned long int outflowTime = 30000;
 
-int ODSetpoint = 780;
+int ODSetpoint = 720;
 
-int iteration = 0;
+unsigned long iteration = 0;
 
 String inputString = "";         // a String to hold incoming data
 bool stringComplete = false;  // whether the string is complete
