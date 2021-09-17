@@ -52,24 +52,41 @@ if client.bad_connection_flag:
 
 
 dateTimeObj = datetime.datetime.now()
-filename = "log/log_"+ dateTimeObj.strftime("%d%b_%H%M%S") +".csv"
+filename = "log/"+ dateTimeObj.strftime("%d%b_%H%M%S")
 
 while True:
     try:
         ser_bytes = ser.readline()
         decoded_bytes = ser_bytes[0:len(ser_bytes)-2].decode("utf-8")
+        strings = decoded_bytes.split(",")
         try:
-            data = [float(i) for i in (decoded_bytes.split(","))]
+            data = [float(i) for i in strings]
             logData = [round(time.time(),3)] + data
             print(logData)
-            try:
-                client.publish("turbidostat/log", json.dumps(logData))
-            except:
-                raise
 
-            with open(filename,"a") as f:
+            with open(filename + "_sensor.csv","a") as f:
                 writer = csv.writer(f,delimiter=",")
                 writer.writerow(logData)
+            
+            try:
+                client.publish("turbidostat/log/sensor", json.dumps(logData))
+            except:
+                continue
+        
+        except ValueError:
+            logtype = strings[0]
+            #data = [float(i) for i in strings[1:]]
+            logData = [logtype] + [str(round(time.time(),3))] + strings[1:]
+            print(logData)
+            with open(filename + "_log.csv","a") as f:
+                writer = csv.writer(f,delimiter=",")
+                writer.writerow(logData)
+
+            try:
+                client.publish("turbidostat/log/loopinfo", json.dumps(logData))
+            except:
+                continue
+        
         except:
             continue
 
