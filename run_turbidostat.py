@@ -23,8 +23,10 @@ def on_connect(client, userdata, flags, rc):
         print("Bad connection Returned code= ",rc)
 
 def on_message(client, userdata, message):
-    msg=json.loads(str(message.payload.decode("utf-8")))
-    print(msg)
+    # msg=json.loads(str(message.payload.decode("utf-8")))
+    msg=str(message.payload.decode("utf-8")) + '\n'
+    sentstatus = ser.write(msg.encode())
+    #print(msg)
 
 
 def on_disconnect(client, userdata, rc):

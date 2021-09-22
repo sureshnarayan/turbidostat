@@ -87,7 +87,7 @@ void senseOD(void)
 
 void loop()
 {
-  delay(100);
+  delay(500);
 
   lcd.clear();
   lcd.setCursor(0, 0);
