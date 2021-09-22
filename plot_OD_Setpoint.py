@@ -13,7 +13,7 @@ if len(sys.argv) > 1:
     filenames = sys.argv[1:]
 
 # reading without sample - of analogRead in Arduino (max 1023)
-a_laser = 900
+a_laser = 950
 
 x = []
 y = []
@@ -56,6 +56,7 @@ def getOD(a_ldr, a_laser):
 
     #   get OD
     OD = logI_laser - logI
+    # OD = np.power(10, logI)
 
     return OD
 
@@ -63,6 +64,7 @@ def getOD(a_ldr, a_laser):
 def calculatePlot(plot_title, experiment_data, a_laser):
 
     OD = getOD(experiment_data[:,1],a_laser)
+    #OD.tofile("log/OD_Ecoli_14Sept.csv", sep = ",")
 
     # time in seconds
     time = experiment_data[:,0] - experiment_data[0,0]
