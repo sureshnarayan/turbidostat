@@ -87,7 +87,7 @@ void senseOD(void)
 
 void loop()
 {
-  delay(500);
+  delay(100);
 
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -110,7 +110,7 @@ void loop()
       startTimeOverride = 0;
       valveManualOverride = false;
       Serial.print("LOOPLOG,");
-      Serial.print((manualOverrideValve==7)?"IN":"OUT");
+      Serial.print((manualOverrideValve==InflowPin)?"IN":"OUT");
       Serial.print(" Valve Switched OFF after (ms)");
       Serial.println(valveOnTimeManual);
     }
@@ -123,7 +123,7 @@ void loop()
     valveOffManual = false;
     Serial.print("LOOPLOG,");
     Serial.print("Manually switching OFF Valve ");
-    Serial.println((manualOverrideValve==7)?"IN":"OUT");
+    Serial.println((manualOverrideValve==InflowPin)?"IN":"OUT");
     return;
   }
 
@@ -256,8 +256,8 @@ void serialEvent() {
       }
       else if (command == "VALVE_ON")
       {
-        int ind2 = inputString.indexOf(':', ind1+1 );   //finds location of second ,
-        String option = inputString.substring(ind1+1, ind2+1);
+        int ind2 = inputString.indexOf(':', ind1+1 );   //finds location of second :
+        String option = inputString.substring(ind1+1, ind2);
         option.trim();
         value = inputString.substring(ind2+1, inputString.length()).toInt();
         
@@ -272,19 +272,18 @@ void serialEvent() {
         {
           startTimeOverride = millis();
           digitalWrite(manualOverrideValve, HIGH);
+          valveManualOverride = true;
 
         }
 
-        valveManualOverride = true;
+
         
         Serial.print("LOOPLOG,");
-        Serial.print("Manually Switching on valve");
-        Serial.print(":");
+        Serial.print("Manually Switching on valve:");
         Serial.print(option);
-        Serial.print(" - ");
-        Serial.println((manualOverrideValve==7)?"IN":"OUT");
+        Serial.print((manualOverrideValve==InflowPin)?" - IN":" - OUT");
         Serial.print("; Switching ON for (ms): ");
-        Serial.println(value);
+        Serial.println(valveOnTimeManual);
       }
       else if (command == "VALVE_OFF")
       {
@@ -300,7 +299,7 @@ void serialEvent() {
         Serial.print(":");
         Serial.print(option);
         Serial.print(" - ");
-        Serial.println((manualOverrideValve==7)?"IN":"OUT");
+        Serial.println((manualOverrideValve==InflowPin)?"IN":"OUT");
       }
       else if (command == "LOOP_OFF")
       {
