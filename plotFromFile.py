@@ -7,7 +7,7 @@ from matplotlib.cm import get_cmap
 from cycler import cycler
 
 filename = 'log_20210820_225727.csv'
-withtime = True
+withtime = False
 if len(sys.argv) > 1:
     filename = sys.argv[1]
     if len(sys.argv) > 2:
@@ -53,21 +53,26 @@ if withtime:
 for i in range(data.shape[dataAxisStart] - 1):
     # y = np.log10(900 / (data[:,i+1]))
     y = data[:,i+1]
-    plt.plot(x, y, '.')
+    #plt.plot(x, y, '.')
     # plt.yscale("log")
     plt.grid(True)
     #plt.plot(x, y, '.')
 
-    if 0: #If averaging
+    if 1: #If averaging
         #Processing - averaging/low pass filtering
-        numReadings = 20
+        numReadings = 100
         queue = [0]*numReadings
         yvar = np.zeros(shape=(data.shape[0]))
         for j in range(data.shape[0]):
             queue.pop(0)
             queue.append(data[j,i+1])
             yvar[j] = sum(queue)/numReadings
-        plt.plot(x, yvar, linestyle = 'solid')
+        #plt.plot(x, yvar, linestyle = 'solid')
+        queue = np.array(queue)
+        sp = np.fft.fft(queue)
+        freq = np.fft.fftfreq(queue.shape[-1])
+        plt.plot(freq, sp.real, freq, sp.imag)
+        plt.show()
 
 
 
