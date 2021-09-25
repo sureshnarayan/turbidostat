@@ -19,8 +19,8 @@ unsigned long startTimeInflow = 0;
 unsigned long startTimeOutflow = 0;
 unsigned long waitTime = 0;
 
-unsigned long inflowTime = 5000;
-unsigned long outflowTime = 30000;
+unsigned long inflowTime = 10000;
+unsigned long outflowTime = 20000;
 
 unsigned long startTimeValve = 0;
 
@@ -127,10 +127,52 @@ void loop()
     return;
   }
 
-  //Inflow
+//----------------------------------------------------------------
+
+  //Outflow
   if (!inflowON && !outflowON && 
       averageOD < ODSetpoint)
   {
+    if (millis() - (startTimeInflow + inflowTime) < 30000)
+    {
+      Serial.print("Outflow_Waiting (min 10000ms)");
+      Serial.print(",");
+      Serial.println(millis() - (startTimeInflow + inflowTime));
+    }
+    else
+    {
+      digitalWrite(OutflowPin, LOW);
+
+      Serial.print("LOOPLOG,");
+      Serial.print("Outflow_ON");
+      Serial.print(",");
+      Serial.print(averageOD);
+      Serial.print(",");
+      Serial.print(String(millis() - startTimeOutflow, DEC));
+      Serial.print(",");
+      Serial.println(String(millis(), DEC));
+  
+      startTimeOutflow = millis();
+      outflowON = true;
+    }
+  }
+  else if (outflowON && (millis() - startTimeOutflow > outflowTime))
+  {
+    digitalWrite(OutflowPin, HIGH);
+    outflowON = false;
+
+    Serial.print("LOOPLOG,");
+    Serial.print("Outflow_OFF");
+    Serial.print(",");
+    Serial.print(averageOD);
+    Serial.print(",");
+    Serial.print(String(millis() - startTimeOutflow, DEC));
+    Serial.print(",");
+    Serial.println(String(millis(), DEC));
+
+
+    // Start inflow after outflow ends
+
     if (millis() - (startTimeInflow + inflowTime) < 30000)
     {
       Serial.print("Inflow_Waiting (30000ms)");
@@ -170,48 +212,6 @@ void loop()
     Serial.println(String(millis(), DEC));
   }
 
-  //Outflow
-  //1800000L - every 30 mins
-  if (!inflowON && !outflowON && 
-      (millis() - startTimeOutflow > 1800000L))
-  {
-    if (millis() - (startTimeInflow + inflowTime) < 10000)
-    {
-      Serial.print("Outflow_Waiting (min 10000ms)");
-      Serial.print(",");
-      Serial.println(millis() - (startTimeInflow + inflowTime));
-    }
-    else
-    {
-      digitalWrite(OutflowPin, LOW);
-
-      Serial.print("LOOPLOG,");
-      Serial.print("Outflow_ON");
-      Serial.print(",");
-      Serial.print(averageOD);
-      Serial.print(",");
-      Serial.print(String(millis() - startTimeOutflow, DEC));
-      Serial.print(",");
-      Serial.println(String(millis(), DEC));
-  
-      startTimeOutflow = millis();
-      outflowON = true;
-    }
-  }
-  else if (outflowON && (millis() - startTimeOutflow > outflowTime))
-  {
-    digitalWrite(OutflowPin, HIGH);
-    outflowON = false;
-
-    Serial.print("LOOPLOG,");
-    Serial.print("Outflow_OFF");
-    Serial.print(",");
-    Serial.print(averageOD);
-    Serial.print(",");
-    Serial.print(String(millis() - startTimeOutflow, DEC));
-    Serial.print(",");
-    Serial.println(String(millis(), DEC));
-  }
 
 }
 
