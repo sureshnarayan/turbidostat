@@ -60,7 +60,7 @@ if client.bad_connection_flag:
     client.loop_stop()    #Stop loop
 
 plot_window = 1
-# x_var = date_range(start=yesterday, end=today, periods=plot_window).to_pydatetime().tolist()
+#x_var = date_range(start=yesterday, end=today, periods=plot_window).to_pydatetime().tolist()
 x_var = datetime.datetime.now() 
 y_var = np.zeros(1)
 y_var2 = np.zeros(1)
@@ -111,6 +111,7 @@ fig, ax = plt.subplots()
 line, = ax.plot(x_var, y_var, '.')
 line2, =ax.plot(x_var, y_var2, '.')
 #ax.set_ylim([0,5])
+#ax.set_xlim([x_var[0],(datetime.datetime.today()+datetime.timedelta(days=1))])
 plt.grid()
 # plt.yscale("log")
 
