@@ -84,6 +84,7 @@ while True:
             
             try:
                 client.publish("turbidostat/log/sensor", json.dumps(logData))
+                client.publish("turbidostat/log/sensor/OD", json.dumps(logODData))
             except:
                 continue
         
@@ -97,7 +98,7 @@ while True:
                 writer.writerow(logData)
 
             try:
-                client.publish("turbidostat/log/loopinfo", json.dumps(logData))
+                client.publish("turbidostat/log/loopinfo", json.dumps(logData[1:]))
             except:
                 continue
         

@@ -301,15 +301,19 @@ void serialEvent() {
         Serial.print(" - ");
         Serial.println((manualOverrideValve==InflowPin)?"IN":"OUT");
       }
-      else if (command == "LOOP_OFF")
+      else if (command == "LOOP")
       {
-        switchOffLoop = true;
-        Serial.println("Switching OFF loop");
-      }
-      else if (command == "LOOP_ON")
-      {
-        switchOffLoop = false;
-        Serial.println("Switching ON loop");
+        String option = inputString.substring(ind1+1, inputString.length());
+        option.trim();
+        if(option == "OFF")
+          switchOffLoop = true;
+        else if (option == "ON")
+          switchOffLoop = false;
+
+        if(switchOffLoop)
+          Serial.println("Turbidostat loop OFF");
+        else
+          Serial.println("Turbidostat loop ON");
       }
       else
       {
