@@ -36,7 +36,7 @@ bool outflowON = false;
 bool switchOffLoop = false;
 bool valveManualOverride = false;
 bool valveOffManual = false;
-unsigned long valveOnTimeManual = 2000; //
+unsigned long valveOnTimeManual = 1800000; //
 int manualOverrideValve = OutflowPin; //Which pin for manual override
 unsigned long startTimeOverride = 0;
 
@@ -100,34 +100,27 @@ void loop()
   lcd.setCursor(11, 1);
   lcd.print(averageOD);
 
-  if (switchOffLoop)return;
-
-  if (valveManualOverride)
+  if (valveManualOverride || valveOffManual)
   {
-    if (millis() - startTimeOverride > valveOnTimeManual)
+    if (millis() - startTimeOverride > valveOnTimeManual || valveOffManual)
     {
       digitalWrite(manualOverrideValve, HIGH);
+
+      Serial.print("LOOPLOG,");
+      Serial.print("Manually Switching off valve:");
+      Serial.print((manualOverrideValve==InflowPin)?" - IN ":" - OUT ");
+      Serial.println((valveOffManual)?0:millis() - startTimeOverride);
+
       startTimeOverride = 0;
       valveManualOverride = false;
-      Serial.print("LOOPLOG,");
-      Serial.print((manualOverrideValve==InflowPin)?"IN":"OUT");
-      Serial.print(" Valve Switched OFF after (ms)");
-      Serial.println(valveOnTimeManual);
+      valveOffManual = false;
     }
     return;
   }
 
-  if (valveOffManual) // to manually switch off a valve
-  {
-    digitalWrite(manualOverrideValve, HIGH);
-    valveOffManual = false;
-    Serial.print("LOOPLOG,");
-    Serial.print("Manually switching OFF Valve ");
-    Serial.println((manualOverrideValve==InflowPin)?"IN":"OUT");
-    return;
-  }
+  if (switchOffLoop)return;
 
-//----------------------------------------------------------------
+// LOOP ----------------------------------------------------------------
 
   //Outflow
   if (!inflowON && !outflowON && 
@@ -226,7 +219,7 @@ void serialEvent() {
     inputString += inChar;
     if (inChar == '\n') {
       stringComplete = true;
-      ind1 = inputString.indexOf(':');  //finds location of first :
+      ind1 = inputString.indexOf(':');  //finds location of first : (returns -1 if not)
       command = inputString.substring(0, ind1);
       command.trim();
       //ind2 = readString.indexOf('\n', ind1+1 );   //finds location of second ,
@@ -271,7 +264,7 @@ void serialEvent() {
         
         {
           startTimeOverride = millis();
-          digitalWrite(manualOverrideValve, HIGH);
+          digitalWrite(manualOverrideValve, LOW);
           valveManualOverride = true;
 
         }
@@ -293,13 +286,8 @@ void serialEvent() {
           manualOverrideValve = OutflowPin;
         else if (option == "IN")
           manualOverrideValve = InflowPin;
-        valveOffManual = false;
-        Serial.print("LOOPLOG,");
-        Serial.print("Manually Switching off valve");
-        Serial.print(":");
-        Serial.print(option);
-        Serial.print(" - ");
-        Serial.println((manualOverrideValve==InflowPin)?"IN":"OUT");
+        valveOffManual = true;
+        valveManualOverride = true;
       }
       else if (command == "LOOP")
       {
@@ -311,10 +299,12 @@ void serialEvent() {
           switchOffLoop = false;
 
         if(switchOffLoop)
-          Serial.println("Turbidostat loop OFF");
+          Serial.println("Tubidostat loop OFF");
         else
-          Serial.println("Turbidostat loop ON");
+          Serial.println("Tubidostat loop ON");
       }
+
+              
       else
       {
         value = inputString.substring(ind1+1, inputString.length()).toInt();
