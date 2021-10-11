@@ -7,7 +7,7 @@ from matplotlib.cm import get_cmap
 from cycler import cycler
 
 filename = 'log_20210820_225727.csv'
-withtime = False
+withtime = True
 if len(sys.argv) > 1:
     filename = sys.argv[1]
     if len(sys.argv) > 2:
@@ -58,7 +58,7 @@ for i in range(data.shape[dataAxisStart] - 1):
     plt.grid(True)
     #plt.plot(x, y, '.')
 
-    if 1: #If averaging
+    if 0: #If averaging
         #Processing - averaging/low pass filtering
         numReadings = 100
         queue = [0]*numReadings
@@ -67,15 +67,9 @@ for i in range(data.shape[dataAxisStart] - 1):
             queue.pop(0)
             queue.append(data[j,i+1])
             yvar[j] = sum(queue)/numReadings
-        #plt.plot(x, yvar, linestyle = 'solid')
-        queue = np.array(queue)
-        sp = np.fft.fft(queue)
-        freq = np.fft.fftfreq(queue.shape[-1])
-        plt.plot(freq, sp.real, freq, sp.imag)
-        plt.show()
+        y = np.stack((y, yvar), axis=-1)
+    plt.plot(x, y, '.')
 
 
 
-
-#plt.bar(x, y, color = 'g', width = 0.72, label = "Age")
 plt.show()
