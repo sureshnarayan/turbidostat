@@ -21,8 +21,8 @@ for filename in filenames:
     if 1: #If averaging
         #Processing - averaging/low pass filtering
         numReadings = 100
-        queue = [0]*numReadings
-        avg = np.zeros(shape=(inputData.shape[0]))
+        queue = [intensity[0]]*numReadings
+        avg = np.ones(shape=(inputData.shape[0]))
         for j in range(inputData.shape[0]):
             queue.pop(0)
             queue.append(intensity[j])

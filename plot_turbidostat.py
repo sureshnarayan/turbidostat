@@ -59,6 +59,41 @@ while not client.connected_flag and not client.bad_connection_flag: #wait in loo
 if client.bad_connection_flag:
     client.loop_stop()    #Stop loop
 
+from matplotlib.animation import FuncAnimation
+
+fig, ax = plt.subplots()
+xdata, ydata = [], []
+ln, = plt.plot([], [], 'ro')
+
+def init():
+    ax.set_xlim(0, 2*np.pi)
+    ax.set_ylim(-1, 1)
+    return ln,
+
+def update(frame):
+    if frame:
+        timestamps = list(map(datetime.datetime.fromtimestamp,frame[:, 0]))
+        xdata.append(timestamps)
+        ydata.append(utilsOD.getOD(frame[:,1],a_laser))
+        ln.set_data(xdata, ydata)
+    return ln,
+
+def frames():
+    while True:
+        frame = []
+        if len(client.buffer):
+            frame = client.buffer
+        client.buffer = []
+        yield frame
+
+
+ani = FuncAnimation(fig, update, frames ,
+                    init_func=init, blit=True)
+plt.show()
+
+
+
+"""
 plot_window = 1
 #x_var = date_range(start=yesterday, end=today, periods=plot_window).to_pydatetime().tolist()
 x_var = datetime.datetime.now() 
@@ -102,6 +137,7 @@ for filename in filenames:
 # x_var = np.vectorize(datetime.datetime.fromtimestamp)(x_var)
 plt.xlabel('time')
 plt.gcf().autofmt_xdate()
+plt.ylabel("OD")
 # myFmt = mdates.DateFormatter('%H:%M')
 # plt.gca().xaxis.set_major_formatter(myFmt)
 
@@ -159,3 +195,4 @@ while True:
         break
         #continue
 
+"""

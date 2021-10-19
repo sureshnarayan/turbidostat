@@ -37,8 +37,8 @@ def on_disconnect(client, userdata, rc):
 client = mqtt.Client()
 client.connected_flag=False
 client.bad_connection_flag=False
-broker = "localhost"
-# broker = "172.16.100.68"
+# broker = "localhost"
+broker = "172.16.100.68"
 port = 1883
 client.on_connect = on_connect
 client.on_message = on_message
@@ -73,14 +73,16 @@ while True:
             logData = [currentTime] + data
             ODData = np.around(utilsOD.getOD(np.array(data),a_laser),3)
             logODData = [currentTime] + ODData.tolist()
+            intensity = np.around(utilsOD.getIntensity(np.array(data)),3)
+            intensityData = [currentTime] + intensity.tolist()
             print(logData)
 
             with open(filename + "_sensor.csv","a") as f:
                 writer = csv.writer(f,delimiter=",")
                 writer.writerow(logData)
-            with open(filename + "_OD.csv","a") as f:
+            with open(filename + "_intensity.csv","a") as f:
                 writer = csv.writer(f,delimiter=",")
-                writer.writerow(logODData)
+                writer.writerow(intensityData)
             
             try:
                 client.publish("turbidostat/log/sensor", json.dumps(logData))

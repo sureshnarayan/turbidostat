@@ -68,7 +68,11 @@ def calculatePlot(plot_title, experiment_data, a_laser):
 
     # time in seconds
     time = experiment_data[:,0] - experiment_data[0,0]
+<<<<<<< HEAD
     print("Total time : " + str(timedelta(seconds=time[-1])))
+=======
+    print("Total time : " + str(timedelta(seconds=time)))
+>>>>>>> 56475bd88a6e47049aea59f0188eaced4fc36c7e
 
 
     name = "Dark2"#"Accent"
