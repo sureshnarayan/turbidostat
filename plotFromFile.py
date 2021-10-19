@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import csv, sys
-from datetime import datetime
+from datetime import datetime,timedelta
 import matplotlib.dates as mdates
 import numpy as np
 from matplotlib.cm import get_cmap
@@ -36,10 +36,8 @@ dataAxisStart = 0
 if withtime:
     dataAxisStart = 1
 
-    # time processing:
-    for i in range(data.shape[0]):
-        if data[i,0] < 1630426739:
-            data[i,0] = data[i,0] + (1630426739 - 1630394045)
+    time = data[-1,0] - data[0,0]
+    print("Total time : " + str(timedelta(seconds=time)))
 
     x = np.vectorize(datetime.fromtimestamp)(data[:, 0])
     plt.xlabel('time')
