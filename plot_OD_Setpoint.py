@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use("tkAgg")
 import csv, sys
-from datetime import datetime
+from datetime import datetime,timedelta
 import matplotlib.dates as mdates
 import numpy as np
 from matplotlib.cm import get_cmap
@@ -68,7 +68,7 @@ def calculatePlot(plot_title, experiment_data, a_laser):
 
     # time in seconds
     time = experiment_data[:,0] - experiment_data[0,0]
-    print("Total time : " + str(time[-1]) + " seconds")
+    print("Total time : " + str(timedelta(seconds=time[-1])))
 
 
     name = "Dark2"#"Accent"
