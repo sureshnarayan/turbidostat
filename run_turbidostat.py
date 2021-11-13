@@ -68,21 +68,24 @@ while True:
         decoded_bytes = ser_bytes[0:len(ser_bytes)-2].decode("utf-8")
         strings = decoded_bytes.split(",")
         if strings[0] == "LOG":
-            currentTime = round(time.time(),3)
-            data = [float(i) for i in strings[1:]]
-            logData = [currentTime] + data
-            ODData = np.around(utilsOD.getOD(np.array(data),a_laser),3)
-            logODData = [currentTime] + ODData.tolist()
-            intensity = np.around(utilsOD.getIntensity(np.array(data)),3)
-            intensityData = [currentTime] + intensity.tolist()
-            print(logData)
+            try:
+                currentTime = round(time.time(),3)
+                data = [float(i) for i in strings[1:]]
+                logData = [currentTime] + data
+                ODData = np.around(utilsOD.getOD(np.array(data),a_laser),3)
+                logODData = [currentTime] + ODData.tolist()
+                intensity = np.around(utilsOD.getIntensity(np.array(data)),3)
+                intensityData = [currentTime] + intensity.tolist()
+                print(logData)
 
-            with open(filename + "_sensor.csv","a") as f:
-                writer = csv.writer(f,delimiter=",")
-                writer.writerow(logData)
-            with open(filename + "_intensity.csv","a") as f:
-                writer = csv.writer(f,delimiter=",")
-                writer.writerow(intensityData)
+                with open(filename + "_sensor.csv","a") as f:
+                    writer = csv.writer(f,delimiter=",")
+                    writer.writerow(logData)
+                with open(filename + "_intensity.csv","a") as f:
+                    writer = csv.writer(f,delimiter=",")
+                    writer.writerow(intensityData)
+            except:
+                continue
             
             try:
                 client.publish("turbidostat/log/sensor", json.dumps(logData))
