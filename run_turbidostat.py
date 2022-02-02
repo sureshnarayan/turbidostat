@@ -62,7 +62,7 @@ dateTimeObj = datetime.datetime.now()
 #filename = "log/"+ dateTimeObj.strftime("%d%b_%H%M%S")
 
 while True:
-    filename = "log/"+ dateTimeObj.strftime("%d%b")
+    filename = "log/"+ dateTimeObj.strftime("%Y%m%d")
     try:
         ser_bytes = ser.readline()
         decoded_bytes = ser_bytes[0:len(ser_bytes)-2].decode("utf-8")
