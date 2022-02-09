@@ -24,7 +24,7 @@ unsigned long outflowTime = 20000;
 
 unsigned long startTimeValve = 0;
 
-int ODSetpoint = 780;
+int ODSetpoint = 100;
 
 
 String inputString = "";         // a String to hold incoming data
@@ -33,7 +33,7 @@ bool stringComplete = false;  // whether the string is complete
 bool inflowON = false;
 bool outflowON = false;
 
-bool switchOffLoop = false;
+bool switchOffLoop = true;
 bool valveManualOverride = false;
 bool valveOffManual = false;
 unsigned long valveOnTimeManual = 1800000; //
