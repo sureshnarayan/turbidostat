@@ -5,7 +5,7 @@
 #define SensorLevel A2
 #define InflowPin 7
 #define OutflowPin 8
-#define outflowOD 600
+#define outflowOD 700
 
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
