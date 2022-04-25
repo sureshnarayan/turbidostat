@@ -5,7 +5,6 @@
 #define SensorLevel A2
 #define InflowPin 7
 #define OutflowPin 8
-#define outflowOD 700
 
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
@@ -16,17 +15,16 @@ long unsigned int total = 0;
 int level = 0;
 int averageOD = 0;
 int readingOD = 0;
-int levelOD = 1023;
 unsigned long startTimeInflow = 0;
 unsigned long startTimeOutflow = 0;
 unsigned long waitTime = 0;
 
-unsigned long inflowTime = 5000;
-unsigned long outflowTime = 5000;
+unsigned long inflowTime = 3000;
+unsigned long outflowTime = 2000;
 
 unsigned long startTimeValve = 0;
 
-int ODSetpoint = 400;
+int ODSetpoint = 100;
 
 
 String inputString = "";         // a String to hold incoming data
@@ -56,7 +54,7 @@ void setup()
   lcd.setCursor(0, 0);
   lcd.print("  TURBIDOSTAT   ");
   lcd.setCursor(0, 1);
-  lcd.print("      V2        ");
+  lcd.print("      V1        ");
   delay(500);
 
   pinMode(InflowPin, OUTPUT);
@@ -89,20 +87,18 @@ void senseOD(void)
 
 void loop()
 {
-  levelOD = analogRead(SensorLevel);
-
   delay(100);
 
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("Average OD");
-  lcd.setCursor(12, 0);
-  lcd.print(averageOD);
+  lcd.print("  Raw OD");
+  lcd.setCursor(11, 0);
+  lcd.print(readingOD);
 
   lcd.setCursor(0, 1);
-  lcd.print(" Level");
-  lcd.setCursor(12, 1);
-  lcd.print(levelOD);
+  lcd.print(" Average");
+  lcd.setCursor(11, 1);
+  lcd.print(averageOD);
 
   if (valveManualOverride || valveOffManual)
   {
@@ -126,11 +122,50 @@ void loop()
 
 // LOOP ----------------------------------------------------------------
 
-  //Inflow
+  //Outflow
   if (!inflowON && !outflowON && 
       averageOD < ODSetpoint)
   {
-    // Start inflow 
+    if (millis() - (startTimeInflow + inflowTime) < 30000)
+    {
+      Serial.print("Outflow_Waiting (min 10000ms)");
+      Serial.print(",");
+      Serial.println(millis() - (startTimeInflow + inflowTime));
+    }
+    else
+    {
+      digitalWrite(OutflowPin, LOW);
+
+      Serial.print("LOOPLOG,");
+      Serial.print("Outflow_ON");
+      Serial.print(",");
+      Serial.print(averageOD);
+      Serial.print(",");
+      Serial.print(String(millis() - startTimeOutflow, DEC));
+      Serial.print(",");
+      Serial.println(String(millis(), DEC));
+  
+      startTimeOutflow = millis();
+      outflowON = true;
+    }
+  }
+  else if (outflowON && (millis() - startTimeOutflow > outflowTime))
+  {
+    digitalWrite(OutflowPin, HIGH);
+    outflowON = false;
+
+    Serial.print("LOOPLOG,");
+    Serial.print("Outflow_OFF");
+    Serial.print(",");
+    Serial.print(averageOD);
+    Serial.print(",");
+    Serial.print(String(millis() - startTimeOutflow, DEC));
+    Serial.print(",");
+    Serial.println(String(millis(), DEC));
+
+
+    // Start inflow after outflow ends
+
     if (millis() - (startTimeInflow + inflowTime) < 30000)
     {
       Serial.print("Inflow_Waiting (30000ms)");
@@ -166,48 +201,6 @@ void loop()
     Serial.print(averageOD);
     Serial.print(",");
     Serial.print(String(millis() - startTimeInflow, DEC));
-    Serial.print(",");
-    Serial.println(String(millis(), DEC));
-  }
-
-  //Outflow
-  if (!inflowON && !outflowON && levelOD < outflowOD)
-  {
-    if (millis() - (startTimeInflow + inflowTime) < 30000)
-    {
-      Serial.print("Outflow_Waiting (min 10000ms)");
-      Serial.print(",");
-      Serial.println(millis() - (startTimeInflow + inflowTime));
-      return;
-    }
-    else 
-    {
-      digitalWrite(OutflowPin, LOW);
-
-      Serial.print("LOOPLOG,");
-      Serial.print("Outflow_ON");
-      Serial.print(",");
-      Serial.print(averageOD);
-      Serial.print(",");
-      Serial.print(String(millis() - startTimeOutflow, DEC));
-      Serial.print(",");
-      Serial.println(String(millis(), DEC));
-  
-      startTimeOutflow = millis();
-      outflowON = true;
-    }
-  }
-  else if (outflowON && (millis() - startTimeOutflow > outflowTime))
-  {
-    digitalWrite(OutflowPin, HIGH);
-    outflowON = false;
-
-    Serial.print("LOOPLOG,");
-    Serial.print("Outflow_OFF");
-    Serial.print(",");
-    Serial.print(averageOD);
-    Serial.print(",");
-    Serial.print(String(millis() - startTimeOutflow, DEC));
     Serial.print(",");
     Serial.println(String(millis(), DEC));
   }
