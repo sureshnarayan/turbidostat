@@ -188,11 +188,21 @@ char* Turbidostat::getHealth(){
 
 
 /*
-Tstat:
+Tstat object:
 Should do the schedule as per preset
+    Need a way to take in the preset - todo - should it be an array/object
+    have a scheduler/event loop - with timer as a loggable/resettable - with a status string
 Should on or off the motors
+    setter for motor states
 Should detect all sensor data and status and loop position
+    getter for all the sensors 
+    generator of log strings
 Should be able to play pause
+    setter for loop play/pause/reset
+Should be able to interact
+    way to handle user input with switch case and doing corresponding actions
+    (no actual variables here)
+    Return acknowledgement after interaction
 
 
 

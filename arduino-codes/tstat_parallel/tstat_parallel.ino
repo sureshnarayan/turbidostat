@@ -243,3 +243,16 @@ void serialEvent(){
         }
 
 }
+
+
+
+/*
+Parallel loop:
+
+Initial presetter
+Update loop of each Tstat
+Log health/status of each Tstat
+Parser for each input, and corresponding return printing if required
+
+
+*/
