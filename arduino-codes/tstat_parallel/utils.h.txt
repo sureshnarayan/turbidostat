@@ -1,0 +1,18 @@
+// string construction for communication; also for parsing to commands
+// command handler
+// motor switch on and off isolation and its own object - motor abstraction and encapsulation: with delay timeouts
+// Loop protocol simplification - easy to read: handle timer events separately/in their own loops
+
+
+
+// Flow control object
+// Construct with a pwm pin parameter
+// Each such object has a timeout optional switch on and a switch off
+// private methods to switch on and off, and a state variable that maintains the current state of the flow
+
+// Turbidostat objects
+// Has inflow, outflow, OD, setpoint, status
+// 
+
+
+// General timeout object that calls other things in the absence of any object

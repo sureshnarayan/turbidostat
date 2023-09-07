@@ -1,0 +1,332 @@
+#include <LiquidCrystal.h>
+#include <TimerOne.h>
+//#include <utils.h>
+
+#define SensorOD A0
+#define SensorLevel A2
+#define InflowPin 7
+#define OutflowPin 8
+#define outflowOD 600
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+const int numReadings = 10;
+int readings[numReadings] = {0, 0, 0, 0, 0};
+int readIndex = 0;
+long unsigned int total = 0;
+int level = 0;
+int averageOD = 0;
+int readingOD = 0;
+int levelOD = 1023;
+unsigned long startTimeInflow = 0;
+unsigned long startTimeOutflow = 0;
+unsigned long waitTime = 0;
+
+unsigned long inflowTime = 3000;
+unsigned long outflowTime = 2000;
+
+unsigned long startTimeValve = 0;
+
+int ODSetpoint = 400;
+
+
+String inputString = "";         // a String to hold incoming data
+bool stringComplete = false;  // whether the string is complete
+
+bool inflowON = false;
+bool outflowON = false;
+
+
+bool switchOffLoop = true;
+bool valveManualOverride = false;
+bool valveOffManual = false;
+unsigned long valveOnTimeManual = 1800000; //
+int manualOverrideValve = OutflowPin; //Which pin for manual override
+unsigned long startTimeOverride = 0;
+
+void setup()
+{
+  lcd.begin(16, 2);
+  Serial.begin(9600);
+
+  for (int thisReading = 0; thisReading < numReadings; thisReading++)
+  {
+    readings[thisReading] = analogRead(SensorOD);
+    total += readings[thisReading];
+  }
+
+  lcd.setCursor(0, 0);
+  lcd.print("  TURBIDOSTAT   ");
+  lcd.setCursor(0, 1);
+  lcd.print("      V2        ");
+  delay(500);
+
+  pinMode(InflowPin, OUTPUT);
+  pinMode(OutflowPin, OUTPUT);
+  digitalWrite(InflowPin, HIGH);
+  digitalWrite(OutflowPin, HIGH);
+
+  Timer1.initialize(300000);// every 300ms
+  Timer1.attachInterrupt(senseOD);// sense and log
+
+}
+
+void senseOD(void)
+{
+  readingOD = analogRead(SensorOD);
+  //interrupts();
+  Serial.print("LOG,");
+  Serial.print(readingOD);
+  Serial.print(",");
+  Serial.println(averageOD);
+
+  total = total - readings[readIndex];
+  readings[readIndex] = readingOD;
+  total = total + readings[readIndex];
+  readIndex++;
+  if (readIndex >= numReadings) readIndex = 0;
+  averageOD = total / numReadings;
+
+}
+
+void loop()
+{
+  levelOD = analogRead(SensorLevel);
+
+  delay(100);
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Average OD");
+  lcd.setCursor(12, 0);
+  lcd.print(averageOD);
+
+  lcd.setCursor(0, 1);
+  lcd.print(" Level");
+  lcd.setCursor(12, 1);
+  lcd.print(levelOD);
+
+  if (valveManualOverride || valveOffManual)
+  {
+    if (millis() - startTimeOverride > valveOnTimeManual || valveOffManual)
+    {
+      digitalWrite(manualOverrideValve, HIGH);
+
+      Serial.print("LOOPLOG,");
+      Serial.print("Manually Switching off valve:");
+      Serial.print((manualOverrideValve==InflowPin)?" - IN ":" - OUT ");
+      Serial.println((valveOffManual)?0:millis() - startTimeOverride);
+
+      startTimeOverride = 0;
+      valveManualOverride = false;
+      valveOffManual = false;
+    }
+    return;
+  }
+
+  if (switchOffLoop)return;
+
+// LOOP ----------------------------------------------------------------
+
+  //Inflow
+  if (!inflowON && !outflowON && 
+      averageOD < ODSetpoint)
+  {
+    // Start inflow 
+    if (millis() - (startTimeInflow + inflowTime) < 30000)
+    {
+      Serial.print("Inflow_Waiting (30000ms)");
+      Serial.print(" , ");
+      Serial.println(millis() - (startTimeInflow + inflowTime));
+    }
+    else
+    {
+      digitalWrite(InflowPin, LOW);
+      inflowON = true;
+
+      Serial.print("LOOPLOG,");
+      Serial.print("Inflow_ON");
+      Serial.print(",");
+      Serial.print(averageOD);
+      Serial.print(",");
+      Serial.print(String(millis() - startTimeInflow, DEC));
+      Serial.print(",");
+      Serial.println(String(millis(), DEC));
+  
+      startTimeInflow = millis();
+    }
+  }
+  else if (inflowON && 
+           (millis() - startTimeInflow > inflowTime))
+  {
+    digitalWrite(InflowPin, HIGH);
+    inflowON = false;
+
+    Serial.print("LOOPLOG,");
+    Serial.print("Inflow_OFF");
+    Serial.print(",");
+    Serial.print(averageOD);
+    Serial.print(",");
+    Serial.print(String(millis() - startTimeInflow, DEC));
+    Serial.print(",");
+    Serial.println(String(millis(), DEC));
+  }
+
+  //Outflow
+  if (!inflowON && !outflowON && levelOD < outflowOD)
+  {
+    if (millis() - (startTimeInflow + inflowTime) < 30000)
+    {
+      Serial.print("Outflow_Waiting (min 10000ms)");
+      Serial.print(",");
+      Serial.println(millis() - (startTimeInflow + inflowTime));
+      return;
+    }
+    else 
+    {
+      digitalWrite(OutflowPin, LOW);
+
+      Serial.print("LOOPLOG,");
+      Serial.print("Outflow_ON");
+      Serial.print(",");
+      Serial.print(averageOD);
+      Serial.print(",");
+      Serial.print(String(millis() - startTimeOutflow, DEC));
+      Serial.print(",");
+      Serial.println(String(millis(), DEC));
+  
+      startTimeOutflow = millis();
+      outflowON = true;
+    }
+  }
+  else if (outflowON && (millis() - startTimeOutflow > outflowTime))
+  {
+    digitalWrite(OutflowPin, HIGH);
+    outflowON = false;
+
+    Serial.print("LOOPLOG,");
+    Serial.print("Outflow_OFF");
+    Serial.print(",");
+    Serial.print(averageOD);
+    Serial.print(",");
+    Serial.print(String(millis() - startTimeOutflow, DEC));
+    Serial.print(",");
+    Serial.println(String(millis(), DEC));
+  }
+
+
+}
+
+void serialEvent() {
+  while (Serial.available()) {
+    String command = "";
+    unsigned long value = 0;
+    int ind1 = 0;
+    
+    // get the new byte:
+    char inChar = (char)Serial.read();
+    inputString += inChar;
+    if (inChar == '\n') {
+      stringComplete = true;
+      ind1 = inputString.indexOf(':');  //finds location of first : (returns -1 if not)
+      command = inputString.substring(0, ind1);
+      command.trim();
+      //ind2 = readString.indexOf('\n', ind1+1 );   //finds location of second ,
+      if (command == "SP")
+      {
+        value = inputString.substring(ind1+1, inputString.length()).toInt();
+        if (value) ODSetpoint = value;
+        Serial.print("Setpoint");
+        Serial.print(",");
+        Serial.println(ODSetpoint);
+      }
+      else if (command == "IN")
+      {
+        value = inputString.substring(ind1+1, inputString.length()).toInt();
+        if (value) inflowTime = value;
+        Serial.print("Inflow ON for");
+        Serial.print(",");
+        Serial.println(inflowTime);
+      }
+      else if (command == "OUT")
+      {
+        value = inputString.substring(ind1+1, inputString.length()).toInt();
+        if (value) outflowTime = value;
+        Serial.print("Outflow ON for");
+        Serial.print(",");
+        Serial.println(outflowTime);
+      }
+      else if (command == "VALVE_ON")
+      {
+        int ind2 = inputString.indexOf(':', ind1+1 );   //finds location of second :
+        String option = inputString.substring(ind1+1, ind2);
+        option.trim();
+        value = inputString.substring(ind2+1, inputString.length()).toInt();
+        
+        if (option == "OUT") 
+          manualOverrideValve = OutflowPin;
+        else if (option == "IN")
+          manualOverrideValve = InflowPin;
+
+        if(value) valveOnTimeManual = value;
+
+        
+        {
+          startTimeOverride = millis();
+          digitalWrite(manualOverrideValve, LOW);
+          valveManualOverride = true;
+
+        }
+
+
+        
+        Serial.print("LOOPLOG,");
+        Serial.print("Manually Switching on valve:");
+        Serial.print(option);
+        Serial.print((manualOverrideValve==InflowPin)?" - IN":" - OUT");
+        Serial.print("; Switching ON for (ms): ");
+        Serial.println(valveOnTimeManual);
+      }
+      else if (command == "VALVE_OFF")
+      {
+        String option = inputString.substring(ind1+1, inputString.length());
+        option.trim();
+        if (option == "OUT") 
+          manualOverrideValve = OutflowPin;
+        else if (option == "IN")
+          manualOverrideValve = InflowPin;
+        valveOffManual = true;
+        valveManualOverride = true;
+      }
+      else if (command == "LOOP")
+      {
+        String option = inputString.substring(ind1+1, inputString.length());
+        option.trim();
+        if(option == "OFF")
+          switchOffLoop = true;
+        else if (option == "ON")
+          switchOffLoop = false;
+
+        if(switchOffLoop)
+          Serial.println("Tubidostat loop OFF");
+        else
+          Serial.println("Tubidostat loop ON");
+      }
+
+              
+      else
+      {
+        value = inputString.substring(ind1+1, inputString.length()).toInt();
+        inputString.trim();
+        Serial.print("Invalid Command");
+        Serial.print(" \"");
+        Serial.print(command);
+        Serial.print(":");
+        Serial.print(value);
+        Serial.print("\",");
+        Serial.println(inputString);
+      }
+      inputString = "";
+    }
+  }
+}

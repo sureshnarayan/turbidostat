@@ -1,0 +1,17 @@
+Code for five parallely running turbidostats
+
+* Five loops running one after another - in a simplified single loop and yet not being hard to debug
+* Communication and control that is centralised
+* Sensing and logging needs to be centralised...?
+* Health signal that tells the state periodically every few minutes; also support for refresh.
+* 
+
+
+
+
+UI for turbidostats
+* Multiple tabs - and with each showing corresponding OD as well - as it changes
+* Each of them periodically queried. Also with a refresh button 
+
+
+
