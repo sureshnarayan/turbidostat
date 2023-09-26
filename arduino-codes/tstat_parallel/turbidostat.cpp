@@ -2,10 +2,43 @@
 #include <Arduino.h>
 #include "turbidostat.h"
 
+/*
+Tstat object:
+Should on or off the motors
+    setter for motor states
+Should detect all sensor data and status and loop position
+    getter for all the sensors 
+    generator of log strings
+Should do the schedule as per preset
+    Need a way to take in the preset - todo - should it be an array/object
+    The preset could be a bunch of alphabets signifying the dilution protocol
+    Option: Start, Stop, Reset, Play, Pause, O0, O1, I0, I1, W,  [O0, W100, O1, W30000] etc, need to remember the previous state, current and next
+    have a scheduler/event loop - with timer as a loggable/resettable - with a status string
+Should be able to play pause
+    setter for loop play/pause/reset
+Should be able to interact
+    way to handle user input with switch case and doing corresponding actions
+    (no actual variables here)
+    Return acknowledgement after interaction
+    set state - can start from any point
 
 
+init():
+id=
+preset=
+timer=
+
+sp=
+running=ON/paused/OFF
+
+
+*/
+
+// TODO
 Turbidostat::Turbidostat(int id, int sensorPin, int inflowPin, int outflowPin, int setPoint = 200){
     this->id = id;
+    this->preset = preset;
+    this->timer = timer;
     this->setPoint = setPoint;
     this->sensorPin = sensorPin;
     this->inflowPin = inflowPin;
@@ -16,23 +49,33 @@ Turbidostat::Turbidostat(int id, int sensorPin, int inflowPin, int outflowPin, i
     // this->timer = TimeoutCallback();
 }
 
+// TODO
 void Turbidostat::init(){
+
+    // Resting state
     pinMode(this->inflowPin, OUTPUT);
     pinMode(this->outflowPin, OUTPUT);
     digitalWrite(this->inflowPin, HIGH);
     digitalWrite(this->outflowPin, HIGH);
-    this->currentOD = this->filter.add(analogRead(this->sensorPin));
+
+    // Get OD
+    this->currentOD = this->filter.add(analogRead(this->sensorPin));  // filter add...
+
+    // Set state of Tstat, also called when reset
+
     return;
 }
 
-int Turbidostat::getOD(){
-    return this->currentOD;
-}
-
+//Should detect all sensor data and status and loop position
+//    getter for all the sensors 
 int Turbidostat::readSensor(){
     int reading = analogRead(this->sensorPin);
     this->currentOD = this->filter.add(reading);
     return reading;
+}
+
+int Turbidostat::getOD(){
+    return this->currentOD;
 }
 
 boolean Turbidostat::isRunning(){
@@ -79,29 +122,53 @@ boolean Turbidostat::runLoop(boolean button){
 }
 */
 
+// Should on or off the motors
+// setter for motor states
 boolean Turbidostat::startInflow(){
     digitalWrite(this->inflowPin, HIGH);
     this->isInflowRunning = true;
 }
-
 
 boolean Turbidostat::stopInflow(){
     digitalWrite(this->inflowPin, LOW);
     this->isInflowRunning = false;
 }
 
-
 boolean Turbidostat::startOutflow(){
     digitalWrite(this->outflowPin, HIGH);
     this->isOutflowRunning = true;
 }
-
 
 boolean Turbidostat::stopOutflow(){ 
     digitalWrite(this->outflowPin, LOW);
     this->isOutflowRunning = false;
 }
 
+// TODO
+// generator of log strings
+char* Turbidostat::getHealth(){
+    // ON/OFF, setpoint, sensor, IN&OUT(ON/OFF/TIMER)
+
+    snprintf(this->healthBuffer, sizeof(this->healthBuffer), 
+    "T%d:%s,SP:%d,OD:%d,In:%s,OUT:%s,DIL:%s", 
+    this->id, this->running?"ON":"OFF",
+    this->setPoint,
+    this->currentOD,
+    this->isInflowRunning?"ON":"OFF",
+    this->isOutflowRunning?"ON":"OFF",
+    this->isDilutionRunning?"ON":"OFF");
+    //need to figure out timer log (atleast for debugging)
+
+    Serial.println(this->healthBuffer);
+
+    return this->healthBuffer;
+}
+
+// Should do the schedule as per preset
+//     Need a way to take in the preset - todo - should it be an array/object
+//     The preset could be a bunch of alphabets signifying the dilution protocol
+//     Option: Start, Stop, Reset, Play, Pause, O0, O1, I0, I1, W,  [O0, W100, O1, W30000] etc, need to remember the previous state, current and next
+//     have a scheduler/event loop - with timer as a loggable/resettable - with a status string
 void Turbidostat::scheduler(int index = 0){
     //Switch for different tasks - each of them addressed by their numbers
     // each will be incremented circularly in the beginning of the loop
@@ -161,24 +228,17 @@ void Turbidostat::update(){
     }
 }
 
-char* Turbidostat::getHealth(){
-    // ON/OFF, setpoint, sensor, IN&OUT(ON/OFF/TIMER)
+// Should be able to interact
+//     way to handle user input with switch case and doing corresponding actions
+//     (no actual variables here)
+//     Return acknowledgement after interaction
+//     set state - can start from any point
+char* Turbidostat::interact(){
 
-    snprintf(this->healthBuffer, sizeof(this->healthBuffer), 
-    "T%d:%s,SP:%d,OD:%d,In:%s,OUT:%s,DIL:%s", 
-    this->id, this->running?"ON":"OFF",
-    this->setPoint,
-    this->currentOD,
-    this->isInflowRunning?"ON":"OFF",
-    this->isOutflowRunning?"ON":"OFF",
-    this->isDilutionRunning?"ON":"OFF");
-    //need to figure out timer log (atleast for debugging)
+    // Parse input and get command 
+    // have a switch for 
 
-    Serial.println(this->healthBuffer);
-
-    return this->healthBuffer;
 }
-
 
 
 
@@ -191,6 +251,8 @@ char* Turbidostat::getHealth(){
 Tstat object:
 Should do the schedule as per preset
     Need a way to take in the preset - todo - should it be an array/object
+    The preset could be a bunch of alphabets signifying the dilution protocol
+    Option: Start, Stop, Reset, Play, Pause, O0, O1, I0, I1, W,  [O0, W100, O1, W30000] etc, need to remember the previous state, current and next
     have a scheduler/event loop - with timer as a loggable/resettable - with a status string
 Should on or off the motors
     setter for motor states
@@ -203,7 +265,16 @@ Should be able to interact
     way to handle user input with switch case and doing corresponding actions
     (no actual variables here)
     Return acknowledgement after interaction
+    set state - can start from any point
 
+
+init():
+id=
+preset=
+timer=
+
+sp=
+running=ON/paused/OFF
 
 
 */
