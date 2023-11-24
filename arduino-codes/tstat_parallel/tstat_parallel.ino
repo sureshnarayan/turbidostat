@@ -251,7 +251,7 @@ Parallel loop:
 
 Initial presetter
 Update loop of each Tstat
-Log health/status of each Tstat
+Log health/status of each Tstat - only the ones that are ON/running 
 Parser for each input, and corresponding return printing if required
 
 

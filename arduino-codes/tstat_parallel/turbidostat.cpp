@@ -17,7 +17,7 @@ Should do the schedule as per preset
 Should be able to play pause
     setter for loop play/pause/reset
 Should be able to interact
-    way to handle user input with switch case and doing corresponding actions
+    way to handle user inp ut with switch case and doing corresponding actions
     (no actual variables here)
     Return acknowledgement after interaction
     set state - can start from any point
@@ -46,6 +46,7 @@ Turbidostat::Turbidostat(int id, int sensorPin, int inflowPin, int outflowPin, i
     this->isInflowRunning = false;
     this->isOutflowRunning = false;
     this->isDilutionRunning = false;
+    this->logCommPacket = []; 
     // this->timer = TimeoutCallback();
 }
 
@@ -169,12 +170,30 @@ char* Turbidostat::getHealth(){
 //     The preset could be a bunch of alphabets signifying the dilution protocol
 //     Option: Start, Stop, Reset, Play, Pause, O0, O1, I0, I1, W,  [O0, W100, O1, W30000] etc, need to remember the previous state, current and next
 //     have a scheduler/event loop - with timer as a loggable/resettable - with a status string
-void Turbidostat::scheduler(int index = 0){
+void Turbidostat::scheduler(char preset = 'P'){
     //Switch for different tasks - each of them addressed by their numbers
     // each will be incremented circularly in the beginning of the loop
     // Each will execute their role and then call the timer with the callback as the scheduler with their current caller's index as the parameter
     // We will also need to send the this number as the parameter - if this were an independent utility: while that is fine and things keep going on as the baton keeps getting passed around. There is no ownership of the schedule and no access to it.
     //So a better way to do it would be to have an object called the scheduler which owns the timer, knows the current state of the timing loop(index), perhaps even the time left, the index to be passed around, and the turbidostat number(that need not be known, since the callback is unique)
+
+    switch(preset){
+        case 'P': // Pause/Stop
+
+            break;
+
+        case 'O': // Output Valve
+
+            break;
+
+        case 'I': // Input Valve
+
+            break;
+
+        case 'W': // Waiting Time
+
+            break;
+    }
 
     switch(index){
         case 1 :
@@ -214,11 +233,9 @@ void Turbidostat::scheduler(int index = 0){
     return;
 }
 
-boolean Turbidostat::IsDilutionProtocolRunning(){
-    return this->isDilutionRunning;
-}
-
-
+// Should Loop between multiple entities of the preset and decide to wait otherwise
+// Should keep track of the current state and the previous state, current time, wait time
+// Should be able to play/Pause from here
 void Turbidostat::update(){
     if(this->running){
         if(this->currentOD < this->setPoint)
@@ -226,6 +243,8 @@ void Turbidostat::update(){
         int index = this->timer.Update();
         if(index) this->scheduler(index);
     }
+
+
 }
 
 // Should be able to interact
@@ -233,17 +252,85 @@ void Turbidostat::update(){
 //     (no actual variables here)
 //     Return acknowledgement after interaction
 //     set state - can start from any point
-char* Turbidostat::interact(){
+char* Turbidostat::interact(char * command){
 
     // Parse input and get command 
     // have a switch for 
 
+    if (strcmp(command, 'ON') == 0){ // Switch On Tstat
+
+            
+    }
+    else if (strcmp(command, 'OFF') == 0){ // Switch off Tstat
+
+            
+    }
+    else if (strcmp(command, 'Play') == 0){ // Output Valve
+
+            
+    }
+    else if (strcmp(command, 'Pause') == 0){ // Pause/Stop
+
+            
+    }
+    else if (strcmp(command, 'Start Inlet Pump') == 0){ // Input Valve
+
+            
+    }
+    else if (strcmp(command, 'Start Outlet Pump') == 0){ // Output Valve
+
+            
+    }
+    else if (strcmp(command, 'Stop Inlet Pump') == 0){ // Input Valve
+
+            
+    }
+    else if (strcmp(command, 'Stop Outlet Pump') == 0){ // Output Valve
+
+            
+    }
+    else if (strcmp(command, 'Config') == 0){ // Waiting Time
+
+            switch (config){
+                case 'Preset':
+
+                case 'SetPoint':
+
+                case 'Frequency': // Min delay between dilutions
+
+            }
+
+            
+
+        default:
+        break;
+    }
 }
 
 
 
 //Need a loop function that checks OD and calls scheduler after checking if running
 //
+
+
+'''
+TODO
+1. State tracker and change
+2. Preset handling
+3. Loop scheduler
+4. Interaction - break string
+5. Handle different commands
+6. Response for interaction
+
+
+Hard to start: 
+so start minimally
+Get a minimum loop running for five of them
+Then slowly build on top of it
+At least, it will always be running
+
+
+'''
 
 
 

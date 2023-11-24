@@ -1,0 +1,5 @@
+{
+    "board": "arduino:avr:megaADK",
+    "sketch": "arduino-codes\\tstat_parallel\\tstat_parallel.ino",
+    "port": "COM3"
+}
