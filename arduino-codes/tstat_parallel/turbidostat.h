@@ -14,7 +14,7 @@ class Turbidostat {
 
 public:
 
-    Turbidostat(int id, int sensorPin, int inflowPin, int outflowPin, int setPoint);
+    Turbidostat(int id, bool running,  int sensorPin, int inflowPin, int outflowPin, int setPoint);
 
     void init();
 
@@ -38,7 +38,7 @@ public:
 
     boolean stopOutflow();
 
-    void scheduler(int index);
+    void scheduler();
 
     boolean IsDilutionProtocolRunning();
 
@@ -46,6 +46,7 @@ public:
 
     char* getHealth();
 
+    boolean setstate(char state , int num);
 
 
 
@@ -61,8 +62,15 @@ private:
     int  inflowPin, outflowPin;
     boolean isInflowRunning, isOutflowRunning;
     int sensorPin;
+    char protocolState[9] = {'L', 'O', 'W' , 'O', 'I', 'W' , 'I',  'W', 'L'};
+    int  protocolTime[9] =  {  0,   1, 1000,   0,   1, 2000,   0, 3000,   1};
+    char *logCommPacket;
+    boolean override;
+    int state;
+    unsigned long startTime = 0;
+    int countDownTimer = 0;
 
-    char healthBuffer [60];
+    char healthBuffer [90];
     // Buffer (and added samples) will be initialised as uint8_t, total 16 samples
     MovingAverage <uint8_t, 10> filter;
     TimeoutCallback timer;

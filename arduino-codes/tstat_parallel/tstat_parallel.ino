@@ -1,40 +1,24 @@
 #include <LiquidCrystal.h>
 #include <TimerOne.h>
 #include "turbidostat.h"
-#include <string.h>
-
-
-#define NumTstat 5
-
 
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
-
-/*
-#define PIN_A0   (14)
-#define PIN_A1   (15)
-#define PIN_A2   (16)
-#define PIN_A3   (17)
-#define PIN_A4   (18)
-#define PIN_A5   (19)
-#define PIN_A6   (20)
-#define PIN_A7   (21)
-*/
-
 //init 5 Turbidostat array with all their settings
-//Turbidostat(sensorPin, inflowPin, outflowPin, setPoint)
+//Turbidostat(id, sensorPin, inflowPin, outflowPin, setPoint)
+#define NumTstat 5
 Turbidostat tstat[NumTstat] = {
-    Turbidostat(1, 14, 1, 2, 500),
-    Turbidostat(2, 15, 1, 2, 500),
-    Turbidostat(3, 16, 1, 2, 500),
-    Turbidostat(4, 17, 1, 2, 500),
-    Turbidostat(5, 18, 1, 2, 500)
+    Turbidostat(1,  true, 15, 47, 45, 500),
+    Turbidostat(2, false, 13, 43, 41, 500),
+    Turbidostat(3, false, 11, 39, 37, 500),
+    Turbidostat(4, false,  9, 35, 33, 500),
+    Turbidostat(5, false,  7, 31, 29, 500)
 };
 
-unsigned long startTime = 0;
+unsigned long startTimeHealth = 0;
 
-String inputString = "";         // a String to hold incoming data
-// char inputString [60];
+// String inputString = "";         // a String to hold incoming data
+char inputString[60];
 bool stringComplete = false;  // whether the string is complete
 
 
@@ -51,14 +35,14 @@ void setup(){
 
     //tstat init - having comm
 
-    lcd.begin(16, 2);
     Serial.begin(9600);
-    
+
+    lcd.begin(16, 2);    
     lcd.setCursor(0, 0);
     lcd.print("  TURBIDOSTAT   ");
     lcd.setCursor(0, 1);
     lcd.print("      V3        ");
-    delay(500);
+    delay(200);
     
     for(int i=0; i<NumTstat; i++){
         tstat[i].init();
@@ -94,30 +78,22 @@ void loop(){
 
 
     //For every tstat
-    //  get od and compare
-    //  take action - timeout function call
-    //  timer loop
+    //  event loop
     for (int i = 0; i < NumTstat; i++)
         tstat[i].update();
 
     //Get health periodically
-    if (millis() - startTime >= 10000){
+    if (millis() - startTimeHealth >= 10000)
         getHealth();
-    }
 
 }
 
 void getHealth(){
     //send health data of each tstat
     // ON/OFF, setpoint, sensor, IN&OUT(ON/OFF/TIMER)
-    //setTimeout event to call it again
-    
-    // send health
     for (int i = 0; i < NumTstat; i++)
-        tstat[i].getHealth();
-
-    startTime = millis();
-
+        Serial.println(tstat[i].getHealth());
+    startTimeHealth = millis();
 }
 
 void serialEvent(){
@@ -126,6 +102,7 @@ void serialEvent(){
     // refresh, switchON/OFF flow manually, setpoint change, ON/OFF
     // change config - in the beginning and anytime inbetween
 
+  /*
     while (Serial.available()) {
         String command = "";
         unsigned long value = 0;
@@ -138,7 +115,7 @@ void serialEvent(){
         if (inChar == '\n') {
             stringComplete = true;
             tstat_index = inputString.indexOf(':');  //finds location of first : (returns -1 if not)
-            command = inputString.substring(0, param1).trim();
+            command = inputString.substring(0, param1);
             command.trim();
             param1 = inputString.indexOf(':');  //finds location of first : (returns -1 if not)
             command = inputString.substring(0, param1);
@@ -241,6 +218,7 @@ void serialEvent(){
             inputString = "";
             }
         }
+  */
 
 }
 
