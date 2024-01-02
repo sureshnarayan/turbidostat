@@ -5,11 +5,11 @@
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 //init 5 Turbidostat array with all their settings
-//Turbidostat(id, sensorPin, inflowPin, outflowPin, setPoint)
+//Turbidostat(id, running, sensorPin, inflowPin, outflowPin, setPoint)
 #define NumTstat 5
 Turbidostat tstat[NumTstat] = {
     Turbidostat(1,  true, 15, 47, 45, 500),
-    Turbidostat(2, false, 13, 43, 41, 500),
+    Turbidostat(2,  true, 13, 43, 41, 500),
     Turbidostat(3, false, 11, 39, 37, 500),
     Turbidostat(4, false,  9, 35, 33, 500),
     Turbidostat(5, false,  7, 31, 29, 500)
@@ -17,9 +17,15 @@ Turbidostat tstat[NumTstat] = {
 
 unsigned long startTimeHealth = 0;
 
-// String inputString = "";         // a String to hold incoming data
-char inputString[60];
+// char inputString[100];         // a String to hold incoming data
+// String inputString = "";
+char command[100];
+char argument[100];
 bool stringComplete = false;  // whether the string is complete
+
+// Define the maximum length of the input string
+const int maxInputLength = 100;
+char inputString[maxInputLength];
 
 
 void setup(){
@@ -50,6 +56,8 @@ void setup(){
     
     Timer1.initialize(300000);// every 300ms
     Timer1.attachInterrupt(sensorRead);// sense and log
+
+    // inputString.reserve(200);
 }
 
 void sensorRead(void)
@@ -83,8 +91,16 @@ void loop(){
         tstat[i].update();
 
     //Get health periodically
-    if (millis() - startTimeHealth >= 10000)
+    if (millis() - startTimeHealth >= 10000){
         getHealth();
+        startTimeHealth = millis();
+    }
+
+    if(stringComplete){
+      Serial.println(inputString);
+      parseAndPrint();
+      stringComplete = false;
+    }
 
 }
 
@@ -93,7 +109,6 @@ void getHealth(){
     // ON/OFF, setpoint, sensor, IN&OUT(ON/OFF/TIMER)
     for (int i = 0; i < NumTstat; i++)
         Serial.println(tstat[i].getHealth());
-    startTimeHealth = millis();
 }
 
 void serialEvent(){
@@ -102,7 +117,31 @@ void serialEvent(){
     // refresh, switchON/OFF flow manually, setpoint change, ON/OFF
     // change config - in the beginning and anytime inbetween
 
-  /*
+
+  // Read serial input into the character array until newline character ('\n') is encountered
+    int index = 0;
+    while (Serial.available() > 0) {
+      char incomingChar = Serial.read();
+
+      if (incomingChar == '\n') {
+        // End of input, add null terminator
+        inputString[index] = '\0';
+        stringComplete = true;
+        break;
+      } else {
+        // Add character to the input string
+        inputString[index] = incomingChar;
+        index++;
+        stringComplete = false;
+
+        // Check if the input exceeds the maximum length
+        if (index >= maxInputLength - 1) {
+          break;
+        }
+      }
+    }
+  
+    /*
     while (Serial.available()) {
         String command = "";
         unsigned long value = 0;
@@ -218,10 +257,50 @@ void serialEvent(){
             inputString = "";
             }
         }
-  */
+    */
 
 }
 
+void parseAndPrint() {
+  // Print each part of the input string
+
+  char* token = strtok(inputString, ":");
+  
+  if (token != NULL) {
+    // Extract command
+    int tstat_index = atoi(token) - 1;
+
+    // Move to the next token
+    token = strtok(NULL, ":");
+
+    // Extract parameter 1
+    if (token != NULL) {
+      strncpy(command, token, maxInputLength);
+      command[maxInputLength - 1] = '\0'; // Ensure null-termination
+    }
+
+    // Move to the next token
+    token = strtok(NULL, ":");
+
+    // Extract parameter 2
+    if (token != NULL) {
+      strncpy(argument, token, maxInputLength);
+      argument[maxInputLength - 1] = '\0'; // Ensure null-termination
+    }
+
+    while (token != NULL) 
+      token = strtok(NULL, ":");
+
+    tstat[tstat_index].interact(command, argument);
+
+    // Serial.println(tstat_index);
+    // Serial.println(command);
+    // Serial.println(argument);
+    // Serial.println(bool(strcmp("cmd",command)));
+    // Serial.println(bool(strcmp("arg", argument)));
+  }
+
+}
 
 
 /*

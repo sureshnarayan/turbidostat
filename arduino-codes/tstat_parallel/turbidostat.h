@@ -8,9 +8,7 @@
 
 class Turbidostat {
 
-// Turbidostat objects
-// Has inflow, outflow, OD, setpoint, status
-// 
+
 
 public:
 
@@ -57,13 +55,13 @@ private:
 
     int id;
     boolean running = false;
-    int currentOD;
+    // int currentOD;
     int setPoint;
     int  inflowPin, outflowPin;
     boolean isInflowRunning, isOutflowRunning;
     int sensorPin;
-    char protocolState[9] = {'L', 'O', 'W' , 'O', 'I', 'W' , 'I',  'W', 'L'};
-    int  protocolTime[9] =  {  0,   1, 1000,   0,   1, 2000,   0, 3000,   1};
+    char protocolState[11] = {'L', 'O', 'W' , 'O', 'I', 'W' , 'I',  'W', 'L', '-', '-'};
+    int  protocolTime[11] =  {  0,   1, 1000,   0,   1, 2000,   0, 3000,   1,   0,   0};
     char *logCommPacket;
     boolean override;
     int state;
@@ -75,6 +73,9 @@ private:
     MovingAverage <uint8_t, 10> filter;
     TimeoutCallback timer;
     boolean isDilutionRunning;
+
+    void parsePreset(char* preset);
+
 };
 
 
